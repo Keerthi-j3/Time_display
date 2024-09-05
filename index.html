@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time App</title>
+</head>
+<body>
+  <h1>Current Time</h1>
+  <p id="time"></p>
+
+  <script>
+    // Function to fetch and display the current time
+    function fetchTime() {
+      fetch('/time')
+        .then(response => response.text())
+        .then(time => {
+          document.getElementById('time').innerText = time;
+        });
+    }
+
+    // Fetch time on page load
+    fetchTime();
+
+    // Update time every second
+    setInterval(fetchTime, 1000);
+  </script>
+</body>
+</html>
