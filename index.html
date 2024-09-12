@@ -3,11 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Time App</title>
+  <title>Time App with CRUD</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { margin: 5px; }
+  </style>
 </head>
 <body>
   <h1>Current Time</h1>
   <p id="time"></p>
+
+  <h2>Add a Time</h2>
+  <input type="text" id="newTime" placeholder="Enter time (e.g., 12:00 PM)">
+  <button onclick="addTime()">Add Time</button>
+
+  <h2>All Times</h2>
+  <ul id="timesList"></ul>
+
+  <h2>Update a Time</h2>
+  <input type="number" id="updateIndex" placeholder="Index">
+  <input type="text" id="updatedTime" placeholder="New time">
+  <button onclick="updateTime()">Update Time</button>
+
+  <h2>Delete a Time</h2>
+  <input type="number" id="deleteIndex" placeholder="Index">
+  <button onclick="deleteTime()">Delete Time</button>
 
   <script>
     // Function to fetch and display the current time
@@ -19,11 +39,75 @@
         });
     }
 
+    // Fetch and display all times
+    function fetchTimes() {
+      fetch('/times')
+        .then(response => response.json())
+        .then(times => {
+          const timesList = document.getElementById('timesList');
+          timesList.innerHTML = '';
+          times.forEach((time, index) => {
+            const listItem = document.createElement('li');
+            listItem.innerText = `${index}: ${time}`;
+            timesList.appendChild(listItem);
+          });
+        });
+    }
+
+    // Add a new time
+    function addTime() {
+      const newTime = document.getElementById('newTime').value;
+      fetch('/times', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ time: newTime })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        fetchTimes(); // Refresh the list of times
+        document.getElementById('newTime').value = ''; // Clear input
+      });
+    }
+
+    // Update a time at a specific index
+    function updateTime() {
+      const index = document.getElementById('updateIndex').value;
+      const updatedTime = document.getElementById('updatedTime').value;
+
+      fetch(`/times/${index}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ time: updatedTime })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        fetchTimes(); // Refresh the list of times
+        document.getElementById('updateIndex').value = '';
+        document.getElementById('updatedTime').value = '';
+      });
+    }
+
+    // Delete a time at a specific index
+    function deleteTime() {
+      const index = document.getElementById('deleteIndex').value;
+
+      fetch(`/times/${index}`, {
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        fetchTimes(); // Refresh the list of times
+        document.getElementById('deleteIndex').value = '';
+      });
+    }
+
     // Fetch time on page load
     fetchTime();
-
-    // Update time every second
-    setInterval(fetchTime, 1000);
+    setInterval(fetchTime, 1000); // Update time every second
+    fetchTimes(); // Fetch times on page load
   </script>
 </body>
 </html>
